@@ -1,3 +1,5 @@
+![](https://img.shields.io/badge/license-CC%20BY--NC%204.0-green?style=for-the-badge)
+
 # Online Repository for "Social Interactions Generate Complex Selection Patterns in Virtual Worlds"
 
 The project is organized as follows:
