@@ -461,114 +461,154 @@ Cucr <- cov(df$Zunhook, df$Zsocial_crouching)
 Cuch <- cov(df$Zunhook, df$Zsocial_chase)
 
 #matrix for interacting phen traits, CI
-CI  = matrix(
-  c( Cg ,                Cgcr,               Cgch,           Cgu,
-     Ccrg ,              Ccr ,               Ccrch ,        Ccru,
-     Cchg,                Cchcr ,              Cch,           Cchu,
-     Cug,                Cucr,                Cuch,           Cu
-     
-  ), # the data elements
-  nrow=4,              # number of rows
-  ncol=4,              # number of columns
-  byrow = TRUE)        # fill matrix by rows
+CI  <- matrix(
+  c(Cg , Cgcr, Cgch, Cgu,
+    Ccrg, Ccr, Ccrch, Ccru,
+    Cchg, Cchcr, Cch, Cchu,
+    Cug, Cucr, Cuch, Cu
+  ),
+  nrow = 4,
+  ncol = 4,
+  byrow = TRUE
+)
 
-CI                     # print the matrix
+write.csv(CI, file = "outputs/tables/CI.csv", col.names = FALSE)
 
-write.csv(CI, file = "outputs/tables/CI.csv", col.names=FALSE) 
+# Equation for the selection differentials S = P*bN + CI*bS
 
-#equation for the selection differentials S=P*bN+CI*bS
-
-E_S=P%*%E_bn+CI%*%E_bs
-E_S
+E_S <- P %*% E_bn + CI %*% E_bs
 
 # TABLE 1 with gradients and selection differentials
 
-Esc_rate_gradients <- data.frame(Behaviour=as.character(c("Resource acquisition", "Hiding", "Defense", "Rescue")),
-                                Interaction_type_predicted= as.character(c("Cooperation +/+", "Selfish +/-", "Altruistic -/+", "Altruistic -/+")),
-                                ßN = E_bn,
-                                ßS = E_bs,
-                                Si = E_S)
-                                
-Esc_rate_gradients 
+Esc_rate_gradients <- data.frame(
+  Behaviour = c(
+    "Resource acquisition", "Hiding",
+    "Defense", "Rescue"
+  ),
+  Interaction_type_predicted = c(
+    "Cooperation +/+", "Selfish +/-",
+    "Altruistic -/+", "Altruistic -/+"
+  ),
+  ßN = E_bn,
+  ßS = E_bs,
+  Si = E_S
+)
 
-tab_df(Esc_rate_gradients,
-       titles =   "B) Selection gradients Survival",
-       col.header = col,
-       file = "outputs/tables/table_gradients_survival.doc")
+Esc_rate_gradients
+
+tab_df(
+  Esc_rate_gradients,
+  titles =   "B) Selection gradients Survival",
+  col.header = col,
+  file = "outputs/tables/table_gradients_survival.doc"
+)
 
 
 #################################################
 # 5. Contributions to selection
 #################################################
 
-E_S=P%*%E_bn+CI%*%E_bs
+E_S <- P %*% E_bn + CI %*% E_bs
 
-P
-E_bn
-CI
-E_bs
-
-#natural selection contrib
-P_E_bn<-P%*%E_bn
+# Natural selection contrib
+P_E_bn <- P %*% E_bn
 P_E_bn
 
-#social sel contrib
-CI_E_bs<-CI%*%E_bs
+# Social sel contrib
+CI_E_bs <- CI %*% E_bs
 CI_E_bs
 
-#Si
+# Si
 E_S
 
-#direct and indirect
-#nat sel direct
-D_E_bn_gen<-P[1,1]%*%E_bn[1,1]
-D_E_bn_crouch<-P[2,2]%*%E_bn[2,1]
-D_E_bn_chase<-P[3,3]%*%E_bn[3,1]
-D_E_bn_unhook<-P[4,4]%*%E_bn[4,1]
+# Direct and indirect
+# Natural selection direct
+D_E_bn_gen <- P[1, 1] %*% E_bn[1, 1]
+D_E_bn_crouch <- P[2, 2] %*% E_bn[2, 1]
+D_E_bn_chase <- P[3, 3] %*% E_bn[3, 1]
+D_E_bn_unhook <- P[4, 4] %*% E_bn[4, 1]
 
-#nat sel indirect
-I_E_bn_gen<-P[1,2]%*%E_bn[2,1]+P[1,3]%*%E_bn[3,1]+P[1,4]%*%E_bn[4,1]
-I_E_bn_crouch<-P[2,1]%*%E_bn[1,1]+P[2,3]%*%E_bn[3,1]+P[2,4]%*%E_bn[4,1]
-I_E_bn_chase<-P[3,1]%*%E_bn[1,1]+P[3,2]%*%E_bn[2,1]+P[3,4]%*%E_bn[4,1]
-I_E_bn_unhook<-P[4,1]%*%E_bn[1,1]+P[4,2]%*%E_bn[2,1]+P[4,3]%*%E_bn[3,1]
+# Nat selection indirect
+I_E_bn_gen <- P[1, 2] %*% E_bn[2, 1] +
+  P[1, 3] %*% E_bn[3, 1] +
+  P[1, 4] %*% E_bn[4, 1]
 
-#soc sel direct
-D_E_bs_gen<-CI[1,1]%*%E_bs[1,1]
-D_E_bs_crouch<-CI[2,2]%*%E_bs[2,1]
-D_E_bs_chase<-CI[3,3]%*%E_bs[3,1]
-D_E_bs_unhook<-CI[4,4]%*%E_bs[4,1]
+I_E_bn_crouch <- P[2, 1] %*% E_bn[1, 1] +
+  P[2, 3] %*% E_bn[3, 1] +
+  P[2, 4] %*% E_bn[4, 1]
 
-#soc sel indirect
-I_E_bs_gen<-CI[1,2]%*%E_bs[2,1]+CI[1,3]%*%E_bs[3,1]+CI[1,4]%*%E_bs[4,1]
-I_E_bs_crouch<-CI[2,1]%*%E_bs[1,1]+CI[2,3]%*%E_bs[3,1]+CI[2,4]%*%E_bs[4,1]
-I_E_bs_chase<-CI[3,1]%*%E_bs[1,1]+CI[3,2]%*%E_bs[2,1]+CI[3,4]%*%E_bs[4,1]
-I_E_bs_unhook<-CI[4,1]%*%E_bs[1,1]+CI[4,2]%*%E_bs[2,1]+CI[4,3]%*%E_bs[3,1]
+I_E_bn_chase <- P[3, 1] %*% E_bn[1, 1] +
+  P[3, 2] %*% E_bn[2, 1] +
+  P[3, 4] %*% E_bn[4, 1]
+
+I_E_bn_unhook <- P[4, 1] %*% E_bn[1, 1] +
+  P[4, 2] %*% E_bn[2, 1] +
+  P[4, 3] %*% E_bn[3, 1]
+
+# Social selection direct
+D_E_bs_gen <- CI[1, 1] %*% E_bs[1, 1]
+D_E_bs_crouch <- CI[2, 2] %*% E_bs[2, 1]
+D_E_bs_chase <- CI[3, 3] %*% E_bs[3, 1]
+D_E_bs_unhook <- CI[4, 4] %*% E_bs[4, 1]
+
+# Social selection indirect
+I_E_bs_gen <- CI[1, 2] %*%E_bs[2, 1] +
+  CI[1, 3] %*% E_bs[3, 1] +
+  CI[1, 4] %*% E_bs[4, 1]
+
+I_E_bs_crouch <- CI[2, 1] %*% E_bs[1, 1] +
+  CI[2, 3] %*% E_bs[3, 1] +
+  CI[2, 4] %*% E_bs[4, 1]
+
+I_E_bs_chase <- CI[3, 1] %*% E_bs[1, 1] +
+  CI[3, 2] %*% E_bs[2, 1] +
+  CI[3, 4] %*% E_bs[4, 1]
+
+I_E_bs_unhook <- CI[4, 1] %*% E_bs[1, 1] +
+  CI[4, 2] %*% E_bs[2, 1] +
+  CI[4, 3] %*% E_bs[3, 1]
 
 
-#TABLE S5 - contributions to selection (also used for fig. 1 )
+# TABLE S5 - contributions to selection (also used for fig. 1 )
 
-E_gen_contrib<-c(D_E_bn_gen,I_E_bn_gen,D_E_bs_gen,I_E_bs_gen )
-E_crouch_contrib<-c(D_E_bn_crouch,I_E_bn_crouch,D_E_bs_crouch,I_E_bs_crouch )
-E_chase_contrib<-c(D_E_bn_chase,I_E_bn_chase,D_E_bs_chase,I_E_bs_chase )
-E_unhook_contrib<-c(D_E_bn_unhook,I_E_bn_unhook,D_E_bs_unhook,I_E_bs_unhook )
+E_gen_contrib <- c(D_E_bn_gen, I_E_bn_gen, D_E_bs_gen, I_E_bs_gen)
+E_crouch_contrib <- c(D_E_bn_crouch, I_E_bn_crouch, D_E_bs_crouch, I_E_bs_crouch)
+E_chase_contrib <- c(D_E_bn_chase, I_E_bn_chase, D_E_bs_chase, I_E_bs_chase)
+E_unhook_contrib <- c(D_E_bn_unhook, I_E_bn_unhook, D_E_bs_unhook, I_E_bs_unhook)
 
-E_contributions <- data.frame(Behaviour=as.character(c("Resource acquisition", "Resource acquisition","Resource acquisition","Resource acquisition",
-                                                       "Hiding", "Hiding","Hiding","Hiding",
-                                                       "Defense","Defense","Defense","Defense",
-                                                       "Rescue", "Rescue", "Rescue", "Rescue"
-)),
-Selection_component= as.character(c("Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect",
-                                    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect",
-                                    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect",
-                                    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect")),
-Value = round(as.numeric(c(E_gen_contrib, E_crouch_contrib, E_chase_contrib,E_unhook_contrib)),2),
-Si = round(as.numeric(c(E_S[1,1],E_S[1,1],E_S[1,1],E_S[1,1],
-                        E_S[2,1],E_S[2,1],E_S[2,1],E_S[2,1],
-                        E_S[3,1],E_S[3,1],E_S[3,1],E_S[3,1],
-                        E_S[4,1],E_S[4,1],E_S[4,1],E_S[4,1])),2)
+E_contributions <- data.frame(
+  Behaviour = c(
+    "Resource acquisition", "Resource acquisition",
+    "Resource acquisition", "Resource acquisition",
+    "Hiding", "Hiding", "Hiding", "Hiding",
+    "Defense", "Defense", "Defense", "Defense",
+    "Rescue", "Rescue", "Rescue", "Rescue"
+  ),
+  Selection_component = c(
+    "Natural Direct", "Natural Indirect",
+    "Social Direct", "Social Indirect",
+    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect",
+    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect",
+    "Natural Direct", "Natural Indirect", "Social Direct", "Social Indirect"
+  ),
+  Value = round(
+    as.numeric(c(
+      E_gen_contrib, E_crouch_contrib,
+      E_chase_contrib, E_unhook_contrib
+    )),
+    digits = 2
+  ),
+  Si = round(
+    as.numeric(c(
+      E_S[1, 1], E_S[1, 1], E_S[1, 1], E_S[1, 1],
+      E_S[2, 1], E_S[2, 1], E_S[2, 1], E_S[2, 1],
+      E_S[3, 1], E_S[3, 1], E_S[3, 1], E_S[3, 1],
+      E_S[4, 1], E_S[4, 1], E_S[4, 1], E_S[4, 1]
+    )),
+    digits = 2
+  )
 )
 
 E_contributions
 
-write.csv(E_contributions, file = "outputs/tables/E_contributions.csv") 
-
+write.csv(E_contributions, file = "outputs/tables/E_contributions.csv")
