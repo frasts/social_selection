@@ -180,7 +180,7 @@ system.time(
   )
 )
 
-ss <- getME(mod_esc_2.1, c("theta","fixef"))
+ss <- getME(mod_esc_2.1, c("theta", "fixef"))
 mod_esc_2.1.upd <- update(
   mod_esc_2.1,
   start = ss,
