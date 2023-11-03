@@ -188,118 +188,184 @@ mod_esc_2.1.upd <- update(
 )
 
 saveRDS(mod_esc_2.1.upd, file = "outputs/models_outputs/mod_esc_2.1.upd.rds")
-#mod_esc_2.1.upd <- readRDS("outputs/models_outputs/mod_esc_2.1.upd.rds")
-
-summary(mod_esc_2.1.upd)
 
 
 ##  c. Model 3
 
-system.time(mod_esc_3.1<- glmer(escaped ~   Zgen + Zcrouching + Zchase+ Zunhook  + 
-                                Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook+
-                                + I(Zgen^2) + I(Zcrouching^2) +  I(Zchase^2) +  I(Zunhook^2) +
-                                + I(Zsocial_gen^2) + I(Zsocial_crouching^2) +  I(Zsocial_chase^2) +  I(Zsocial_unhook^2) +
-                                Zgame_duration + 
-                                (1|map_code), data = df, family = binomial (link = "logit"),
-                                control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)) )
+f3.1 <- "escaped ~
+    Zgen + Zcrouching + Zchase+ Zunhook  + 
+    Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook+
+    + I(Zgen^2) + I(Zcrouching^2) +  I(Zchase^2) +  I(Zunhook^2) +
+    I(Zsocial_gen^2) + I(Zsocial_crouching^2) +
+    I(Zsocial_chase^2) +  I(Zsocial_unhook^2) +
+    Zgame_duration + (1|map_code)"
 
-ss <- getME(mod_esc_3.1,c("theta","fixef"))
-mod_esc_3.1.upd <- update(mod_esc_3.1,start=ss,control=glmerControl(optCtrl=list(maxfun=2e4)))
+system.time(
+  mod_esc_3.1 <- glmer(
+    formula = f3.1,
+    data = df,
+    family = binomial(link = "logit"),
+    control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)
+  )
+)
+
+ss <- getME(mod_esc_3.1, c("theta", "fixef"))
+mod_esc_3.1.upd <- update(
+  mod_esc_3.1,
+  start = ss,
+  control = glmerControl(optCtrl = list(maxfun = 2e4))
+)
 
 saveRDS(mod_esc_3.1.upd, file = "outputs/models_outputs/mod_esc_3.1.upd.rds")
-#mod_esc_3.1.upd <- readRDS("outputs/models_outputs/mod_esc_3.1.upd.rds")
-
-summary(mod_esc_3.1.upd)
 
 
 ##  4. Model 4 (quadratic and correlational)
 
-system.time(mod_esc_4.1<- glmer(escaped ~   Zgen + Zcrouching + Zchase+ Zunhook  + 
-                                Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook+
-                                + I(Zgen^2) + I(Zcrouching^2) +  I(Zchase^2) +  I(Zunhook^2) +
-                                + I(Zsocial_gen^2) + I(Zsocial_crouching^2) +  I(Zsocial_chase^2) +  I(Zsocial_unhook^2) +
-                                Zgen*Zcrouching + Zgen*Zchase + Zgen*Zunhook +
-                                Zcrouching*Zchase + Zcrouching*Zunhook + Zchase*Zunhook +
-                                Zsocial_gen*Zsocial_crouching + Zsocial_gen*Zsocial_chase + Zsocial_gen*Zsocial_unhook +
-                                Zsocial_crouching*Zsocial_chase + Zsocial_crouching*Zsocial_unhook + Zsocial_chase*Zsocial_unhook +
-                                Zgen*Zsocial_gen +   Zchase*Zsocial_chase +  Zunhook*Zsocial_unhook +Zcrouching*Zsocial_crouching+
-                                Zgame_duration + (1|map_code), data = df, family = binomial (link = "logit"),
-                              control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)) )
+f4.1 <- "escaped ~
+    Zgen + Zcrouching + Zchase+ Zunhook  + 
+    Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook +
+    I(Zgen^2) + I(Zcrouching^2) +  I(Zchase^2) +
+    I(Zunhook^2) + I(Zsocial_gen^2) +
+    I(Zsocial_crouching^2) + I(Zsocial_chase^2) + I(Zsocial_unhook^2) +
+    Zgen:Zcrouching + Zgen:Zchase + Zgen:Zunhook +
+    Zcrouching:Zchase + Zcrouching:Zunhook + Zchase:Zunhook +
+    Zsocial_gen:Zsocial_crouching + Zsocial_gen:Zsocial_chase +
+    Zsocial_gen:Zsocial_unhook + Zsocial_crouching:Zsocial_chase +
+    Zsocial_crouching:Zsocial_unhook + Zsocial_chase:Zsocial_unhook +
+    Zgen:Zsocial_gen + Zchase:Zsocial_chase +
+    Zunhook:Zsocial_unhook + Zcrouching:Zsocial_crouching +
+    Zgame_duration + (1|map_code)"
 
-ss <- getME(mod_esc_4.1,c("theta","fixef"))
-mod_esc_4.1.upd <- update(mod_esc_4.1,start=ss,control=glmerControl(optCtrl=list(maxfun=2e4)))
+system.time(
+  mod_esc_4.1 <- glmer(
+    formula = f4.1,
+    data = df,
+    family = binomial(link = "logit"),
+    control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)
+  )
+)
+
+ss <- getME(mod_esc_4.1, c("theta", "fixef"))
+mod_esc_4.1.upd <- update(
+  mod_esc_4.1,
+  start = ss,
+  control = glmerControl(optCtrl = list(maxfun = 2e4))
+)
 
 saveRDS(mod_esc_4.1.upd, file = "outputs/models_outputs/mod_esc_4.1.upd.rds")
-#mod_esc_4.1.upd <- readRDS("outputs/models_outputs/mod_esc_4.1.upd.rds")
 
 #summary
-summ(mod_esc_4.1.upd) #log odds
-summ(mod_esc_4.1.upd, exp = TRUE) #odds ratio
-coefs_esc_4.1.upd<-summ(mod_esc_4.1.upd)$coeftable
-logit2prob(coefs_esc_4.1.upd[,1]) #probabilities
-
+summ(mod_esc_4.1.upd) # log odds
+summ(mod_esc_4.1.upd, exp = TRUE) # odds ratio
+coefs_esc_4.1.upd <- summ(mod_esc_4.1.upd)$coeftable
+logit2prob(coefs_esc_4.1.upd[, 1]) # probabilities
 summary(mod_esc_4.1.upd)
 
 
-#sim posterior simulations of beta from a glm object
-nsim<-1000
-bsim<-arm::sim(mod_esc_4.1.upd, n.sim=nsim)
+# Posterior simulations of beta from a glm object
+nsim <- 1000
+bsim <- arm::sim(mod_esc_4.1.upd, n.sim = nsim)
 
-#credibility interval for fixef
-apply(bsim@fixef, 2, quantile, prob=c(0.025, 0.975))
+# Credibility interval for fixef
+apply(bsim@fixef, 2, quantile, prob = c(0.025, 0.975))
 
-#model coefficients
+# Model coefficients
 summary(mod_esc_4.1.upd)$coefficients
 
 #table for fixed effects
-fixefs_mod_esc_4.1.upd<-(table(mod_esc_4.1.upd)[,-2])
+fixefs_mod_esc_4.1.upd <- (table(mod_esc_4.1.upd)[, -2])
 
-fixefs_mod_esc_4.1.upd <- data.frame("Fixed effects" = c("Intercept", "Focal resource acquisition", "Focal hiding", "Focal defense", "Focal rescue", "Social resource acquisition", "Social hiding", "Social defense", "Social rescue", 
-                                                         "Quadratic Focal resource acquisition", "Quadratic Focal hiding", "Quadratic Focal defense", "Quadratic Focal rescue", "Quadratic Social resource acquisition ", "Quadratic Social hiding", "Quadratic Social defense", "Quadratic Social rescue",
-                                                         "Game duration", "Focal resource acquisition*hiding", "Focal resource acquisition*defense", "Focal resource acquisition*rescue", "Focal hiding*defense", "Focal hiding*rescue", "Focal defense*rescue",
-                                                         "Social resource acquisition*hiding", "Social resource acquisition*defense", "Social resource acquisition*rescue", "Social hiding*defense", "Social hiding*rescue", "Social defense*rescue",
-                                                         "Focal*Social resource acquisition", "Focal*Social hiding", "Focal*Social defense", "Focal*Social rescue"
-), fixefs_mod_esc_4.1.upd )
+fixefs_mod_esc_4.1.upd <- data.frame(
+  "Fixed effects" = c(
+    "Intercept", "Focal resource acquisition", "Focal hiding",
+    "Focal defense", "Focal rescue",
+    "Social resource acquisition", "Social hiding",
+    "Social defense", "Social rescue",
+    "Quadratic Focal resource acquisition", "Quadratic Focal hiding",
+    "Quadratic Focal defense", "Quadratic Focal rescue",
+    "Quadratic Social resource acquisition ", "Quadratic Social hiding",
+    "Quadratic Social defense", "Quadratic Social rescue",
+    "Game duration", "Focal resource acquisition:hiding",
+    "Focal resource acquisition:defense", "Focal resource acquisition:rescue",
+    "Focal hiding:defense", "Focal hiding:rescue", "Focal defense:rescue",
+    "Social resource acquisition:hiding", "Social resource acquisition:defense",
+    "Social resource acquisition:rescue", "Social hiding:defense",
+    "Social hiding:rescue", "Social defense:rescue",
+    "Focal:Social resource acquisition", "Focal:Social hiding",
+    "Focal:Social defense", "Focal:Social rescue"
+  ),
+  fixefs_mod_esc_4.1.upd
+)
 
 
-#function to get quadratic terms coefficients and CI for those, multiplies x2 the quadratic coefficients
-
+# Function to get quadratic coefficients and CI for those,
+# multiplies x2 the quadratic coefficients
 quad <- function(model) {
-  aa<- as.data.frame(bsim@fixef)
-  aa<-aa[c(10:17)] #this may change if we change fixed effects 
-  aa2<-aa*2                 
-  aaa2<-apply(aa2, 2, quantile, prob=c(0.025, 0.975))
-  taaa2<-t(aaa2)
-  taaa2<-as.data.frame(taaa2)
-  
-  bb<-summary(model)$coefficients
-  bb<-as.data.frame(bb)
-  bb<-bb$Estimate[c(10:17)]
-  Estimate<-bb*2
-  
-  tabq<-cbind(Estimate,taaa2) 
-  tabq<-round(tabq,2)
+  aa <- as.data.frame(bsim@fixef)
+  aa <- aa[c(10:17)] #this may change if we change fixed effects
+  aa2 <- aa * 2
+  aaa2 <- apply(aa2, 2, quantile, prob = c(0.025, 0.975))
+  taaa2 <- t(aaa2)
+  taaa2 <- as.data.frame(taaa2)
+
+  bb <- summary(model)$coefficients
+  bb <- as.data.frame(bb)
+  bb <- bb$Estimate[c(10:17)]
+  Estimate <- bb * 2
+
+  tabq <- cbind(Estimate, taaa2)
+  tabq <- round(tabq, 2)
   tabq
 }
 
-quad_mod_esc_4.1.upd<-quad(mod_esc_4.1.upd)
-quad_mod_esc_4.1.upd <- data.frame("Fixed effects" = c("Quadratic Focal resource acquisition", "Quadratic Focal hiding", "Quadratic Focal defense", "Quadratic Focal rescue", "Quadratic Social resource acquisition ", "Quadratic Social hiding", "Quadratic Social defense", "Quadratic Social rescue"), quad_mod_esc_4.1.upd )
+quad_mod_esc_4.1.upd <- quad(mod_esc_4.1.upd)
+quad_mod_esc_4.1.upd <- data.frame(
+  "Fixed effects" = c(
+    "Quadratic Focal resource acquisition", "Quadratic Focal hiding",
+    "Quadratic Focal defense", "Quadratic Focal rescue",
+    "Quadratic Social resource acquisition ", "Quadratic Social hiding",
+    "Quadratic Social defense", "Quadratic Social rescue"
+  ),
+  quad_mod_esc_4.1.upd
+)
 
-#replacing with the quadratic coefficients x 2
-fixefs_mod_esc_4.1.upd[match(quad_mod_esc_4.1.upd$Fixed.effects, fixefs_mod_esc_4.1.upd$Fixed.effects), ] <- quad_mod_esc_4.1.upd
-names(fixefs_mod_esc_4.1.upd)<-cbind("Fixed Effects","Selection gradient", "lower 2.5% CI",  "upper 97.5% CI")
+# Replacing with the quadratic coefficients x 2
+fixefs_mod_esc_4.1.upd[
+  match(
+    quad_mod_esc_4.1.upd$Fixed.effects,
+    fixefs_mod_esc_4.1.upd$Fixed.effects
+  ),
+] <- quad_mod_esc_4.1.upd
+names(fixefs_mod_esc_4.1.upd) <- cbind(
+  "Fixed Effects",
+  "Selection gradient",
+  "lower 2.5% CI",
+  "upper 97.5% CI"
+)
 
-#table for random effects
-tab_map_code_mod_esc_4.1.upd<-round(t(as.data.frame(quantile(apply(bsim@ranef$map_code[ , , 1],1,var), prob=c(0.5, 0.025, 0.975)))),2)
-ranefs_mod_esc_4.1.upd<-tab_map_code_mod_esc_4.1.upd
-names(ranefs_mod_esc_4.1.upd)<-cbind("Variance", "lower 2.5% CI",  "upper 97.5% CI")
-ranefs_mod_esc_4.1.upd <- data.frame("Random effects" = "Map", ranefs_mod_esc_4.1.upd)
+# Table for random effects
+tab_map_code_mod_esc_4.1.upd <- round(
+  t(as.data.frame(quantile(apply(bsim@ranef$map_code[ , , 1], 1, var), prob = c(0.5, 0.025, 0.975)))),
+  digits = 2
+)
+ranefs_mod_esc_4.1.upd <- tab_map_code_mod_esc_4.1.upd
+names(ranefs_mod_esc_4.1.upd) <- cbind(
+  "Variance",
+  "lower 2.5% CI",
+  "upper 97.5% CI"
+)
+ranefs_mod_esc_4.1.upd <- data.frame(
+  "Random effects" = "Map",
+  ranefs_mod_esc_4.1.upd
+)
 
 #TABLE S4 (model 4 output)
-tab_dfs(list(fixefs_mod_esc_4.1.upd,ranefs_mod_esc_4.1.upd),
-        titles = c("Model 4","Model 4"),
-        col.header = col,
-        file = "outputs/tables/table_mod_esc_4.1.upd.doc")
+tab_dfs(
+  list(fixefs_mod_esc_4.1.upd, ranefs_mod_esc_4.1.upd),
+  titles = c("Model 4", "Model 4"),
+  col.header = col,
+  file = "outputs/tables/table_mod_esc_4.1.upd.doc"
+)
 
 
 
@@ -312,22 +378,22 @@ tab_dfs(list(fixefs_mod_esc_4.1.upd,ranefs_mod_esc_4.1.upd),
 #mod_esc_2.1.upd <- readRDS("outputs/models_outputs/mod_esc_2.1.upd.rds")
 #mod_esc_3.1.upd <- readRDS("outputs/models_outputs/mod_esc_3.1.upd.rds")
 #mod_esc_4.1.upd <- readRDS("outputs/models_outputs/mod_esc_4.1.upd.rds")
-coefs_esc_1.1.upd<-summ(mod_esc_1.1.upd)$coeftable
-coefs_esc_2.1.upd<-summ(mod_esc_2.1.upd)$coeftable
-coefs_esc_3.1.upd<-summ(mod_esc_3.1.upd)$coeftable
-coefs_esc_4.1.upd<-summ(mod_esc_4.1.upd)$coeftable
+coefs_esc_1.1.upd <- summ(mod_esc_1.1.upd)$coeftable
+coefs_esc_2.1.upd <- summ(mod_esc_2.1.upd)$coeftable
+coefs_esc_3.1.upd <- summ(mod_esc_3.1.upd)$coeftable
+coefs_esc_4.1.upd <- summ(mod_esc_4.1.upd)$coeftable
 
 #extracting log odds linear coefficients (betas - selection gradients)
-coefs_esc_1.1.upd[,1]
+coefs_esc_1.1.upd[, 1]
 #need the linear gradients for focal and social
-E_bn_gen<-coefs_esc_1.1.upd[2,1]
-E_bn_crouching<-coefs_esc_1.1.upd[3,1]
-E_bn_chase<-coefs_esc_1.1.upd[4,1]
-E_bn_unhook<-coefs_esc_1.1.upd[5,1]
-E_bs_gen<-coefs_esc_1.1.upd[6,1]
-E_bs_crouching<-coefs_esc_1.1.upd[7,1]
-E_bs_chase<-coefs_esc_1.1.upd[8,1]
-E_bs_unhook<-coefs_esc_1.1.upd[9,1]
+E_bn_gen <- coefs_esc_1.1.upd[2, 1]
+E_bn_crouching <- coefs_esc_1.1.upd[3, 1]
+E_bn_chase <- coefs_esc_1.1.upd[4, 1]
+E_bn_unhook <- coefs_esc_1.1.upd[5, 1]
+E_bs_gen <- coefs_esc_1.1.upd[6, 1]
+E_bs_crouching <- coefs_esc_1.1.upd[7, 1]
+E_bs_chase <- coefs_esc_1.1.upd[8, 1]
+E_bs_unhook <- coefs_esc_1.1.upd[9, 1]
 
 
 
@@ -335,46 +401,41 @@ E_bs_unhook<-coefs_esc_1.1.upd[9,1]
 # 4. Selection differentials
 #################################################
 
-#EQ 11 from Wolf et al. 1999 paper: S=P*bN+CI*bS
+#EQ 11 from Wolf et al. 1999 paper: S = P*bN + CI*bS
 
-#organizing vectors of gradients
-E_bn = matrix(
-  c( E_bn_gen,
-     E_bn_crouching,
-     E_bn_chase, 
-     E_bn_unhook
+# Organizing vectors of gradients
+E_bn <- matrix(
+  c(E_bn_gen,
+    E_bn_crouching,
+    E_bn_chase,
+    E_bn_unhook
   ),
-  nrow=4,
-  ncol=1,
-  byrow = TRUE) 
+  nrow = 4,
+  ncol = 1,
+  byrow = TRUE
+)
 
-E_bn
-
-E_bs = matrix(
-  c( E_bs_gen, 
-     E_bs_crouching,
-     E_bs_chase, 
-     E_bs_unhook
+E_bs <- matrix(
+  c(E_bs_gen,
+    E_bs_crouching,
+    E_bs_chase,
+    E_bs_unhook
   ),
-  nrow=4,
-  ncol=1,
-  byrow = TRUE) 
-
-E_bs
-
+  nrow = 4,
+  ncol = 1,
+  byrow = TRUE
+)
 
 # (variance is 1 for all traits in the full dataset)
-V=1  
+V <- 1
 
-#matrix of VCV for focal traits, P  
+# VCV matrix for focal traits, P
 focaltraits <- select(df, Zgen, Zcrouching, Zchase, Zunhook)
-P<-cov(focaltraits)
-P
+P <- cov(focaltraits)
+write.csv(P, file = "outputs/tables/P.csv", col.names = FALSE)
 
-write.csv(P, file = "outputs/tables/P.csv", col.names=FALSE)
-
-#CI is the covariance matrix of focal and social traits (interactant phenotypic covariances)
-#The elements of the matrix CI are the covariance of the focal individual phenotype (the rows) with the mean social environment (the columns) experienced by that individual. 
+# CI is the covariance matrix of focal and social traits (interactant phenotypic covariances)
+# The elements of the matrix CI are the covariance of the focal individual phenotype (the rows) with the mean social environment (the columns) experienced by that individual.
 
 #        Zsocial_gen    Zsocial_crouching        Zsocial_chase Zsocial_unhook
 #Zgen     Cg                   Cgcr               Cgch           Cgu
@@ -382,22 +443,22 @@ write.csv(P, file = "outputs/tables/P.csv", col.names=FALSE)
 #Zchase   Cchg                Cchcr               Cch           Cchu
 #Zunhook  Cug                 Cucr                Cuch           Cu
 
-Cg <-cov(df$Zgen, df$Zsocial_gen)
-Ccr <-cov(df$Zcrouching, df$Zsocial_crouching)
-Cch <-cov(df$Zchase, df$Zsocial_chase)
-Cu <-cov(df$Zunhook, df$Zsocial_unhook)
-Cgcr <-cov(df$Zgen, df$Zsocial_crouching)
-Cgch <-cov(df$Zgen, df$Zsocial_chase)
-Cgu <-cov(df$Zgen, df$Zsocial_unhook)
-Ccrg <-cov(df$Zcrouching, df$Zsocial_gen)
-Ccrch <-cov(df$Zcrouching, df$Zsocial_chase)
-Ccru <-cov(df$Zcrouching, df$Zsocial_unhook)
-Cchg <-cov(df$Zchase, df$Zsocial_gen)
-Cchcr <-cov(df$Zchase, df$Zsocial_crouching)
-Cchu <-cov(df$Zchase, df$Zsocial_unhook)
-Cug <-cov(df$Zunhook, df$Zsocial_gen)
-Cucr <-cov(df$Zunhook, df$Zsocial_crouching)
-Cuch <-cov(df$Zunhook, df$Zsocial_chase)
+Cg <- cov(df$Zgen, df$Zsocial_gen)
+Ccr <- cov(df$Zcrouching, df$Zsocial_crouching)
+Cch <- cov(df$Zchase, df$Zsocial_chase)
+Cu <- cov(df$Zunhook, df$Zsocial_unhook)
+Cgcr <- cov(df$Zgen, df$Zsocial_crouching)
+Cgch <- cov(df$Zgen, df$Zsocial_chase)
+Cgu <- cov(df$Zgen, df$Zsocial_unhook)
+Ccrg <- cov(df$Zcrouching, df$Zsocial_gen)
+Ccrch <- cov(df$Zcrouching, df$Zsocial_chase)
+Ccru <- cov(df$Zcrouching, df$Zsocial_unhook)
+Cchg <- cov(df$Zchase, df$Zsocial_gen)
+Cchcr <- cov(df$Zchase, df$Zsocial_crouching)
+Cchu <- cov(df$Zchase, df$Zsocial_unhook)
+Cug <- cov(df$Zunhook, df$Zsocial_gen)
+Cucr <- cov(df$Zunhook, df$Zsocial_crouching)
+Cuch <- cov(df$Zunhook, df$Zsocial_chase)
 
 #matrix for interacting phen traits, CI
 CI  = matrix(
