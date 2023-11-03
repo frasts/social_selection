@@ -1,17 +1,17 @@
 ###############################################
 
-# R script for Statistical analyses
-# Associated to "Social interactions generate complex selection patterns in virtual worlds"
+# R script for statistical analyses
+# associated to "Social interactions generate complex selection patterns in virtual worlds"
 # Santostefano, Francesca; Fraser Franco, Maxime; Montiglio, Pierre-Olivier
 # 01-Nov-2023
-# See associated Readme file for metadata description
+# See associated README file for metadata description
 
 #################################################
 
 # This R script is organized as follows:
 
 # 1. Dependencies and setup
-# 2. Mixed models survival  
+# 2. Mixed models survival
 ##  a. Model 1 (linear gradients)
 ##  b. Model 2
 ##  c. Model 3
@@ -20,117 +20,172 @@
 # 4. Selection differentials + Table 1
 # 5. Contributions to selection
 
-#######################
-# 1. Dependencies and setup #
-######################
+
+
+#################################################
+# 1. Dependencies and setup
+#################################################
 
 #"R version 4.2.3 (2023-03-15 ucrt)"
 
-#Set working directory to you own path where the folder "social_selection" is
-setwd("/path/to/folder/social_selection")
-
 # List of packages needed
-packages_list <- c("data.table","lme4","arm","dplyr","jtools" ,"sjPlot" )
+packages_list <- c(
+  "data.table", "lme4", "arm",
+  "dplyr", "jtools", "sjPlot"
+)
 
 # Load packages - install them if not already present
-lapply(packages_list, function(package) {
-  if (!require(package, character.only = TRUE)) {
-    install.packages(package)
-    library(package, character.only = TRUE)
+lapply(
+  packages_list, function(package) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package)
+      library(package, character.only = TRUE)
+    }
   }
-})
+)
 
-#read in data file
+# Import in data file
 df <- fread("data/df_social_selection.csv")
 
-#######################
-# 2. Mixed models survival#
-#######################
+
+
+#################################################
+# 2. Mixed models survival
+#################################################
 
 ## a. Model 1 (linear gradients)
 
-system.time(mod_esc_1.1<- glmer (escaped ~   Zgen+ Zcrouching + Zchase + Zunhook +  Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook+
-                                 + Zgame_duration + 
-                                (1|map_code), data = df, family = binomial (link = "logit"),
-                               control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE) ))
+f1.1 <- "escaped ~
+    Zgen + Zcrouching + Zchase + Zunhook +
+    Zsocial_gen+ Zsocial_crouching + Zsocial_chase +
+    Zsocial_unhook + Zgame_duration +
+    (1|map_code)"
 
-# updating model with controls
-ss <- getME(mod_esc_1.1,c("theta","fixef"))
-mod_esc_1.1.upd <- update(mod_esc_1.1,start=ss,control=glmerControl(optCtrl=list(maxfun=2e4)))
+system.time(
+  mod_esc_1.1 <- glmer(
+    formula = f1.1,
+    data = df,
+    family = binomial(link = "logit"),
+    control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)
+  )
+)
 
-# saving model object output
+# Updating model with controls
+ss <- getME(mod_esc_1.1, c("theta", "fixef"))
+mod_esc_1.1.upd <- update(
+  mod_esc_1.1,
+  start = ss,
+  control = glmerControl(optCtrl = list(maxfun = 2e4))
+)
+
+# Saving model object output
 saveRDS(mod_esc_1.1.upd, file = "outputs/models_outputs/mod_esc_1.1.upd.rds")
-#mod_esc_1.1.upd <- readRDS("outputs/models_outputs/mod_esc_1.1.upd.rds")
 
-#models summary
-summ(mod_esc_1.1.upd) #log odds
-summ(mod_esc_1.1.upd, exp = TRUE, r.squared = FALSE) #odds ratio
-coefs_esc_1.1.upd<-summ(mod_esc_1.1.upd)$coeftable
+# Model summary
+summ(mod_esc_1.1.upd) # log odds
+summ(mod_esc_1.1.upd, exp = TRUE, r.squared = FALSE) # odds ratio
+coefs_esc_1.1.upd <- summ(mod_esc_1.1.upd)$coeftable
 
-#function to extract probabilities
-logit2prob <- function(logit){
+# Function to extract probabilities
+logit2prob <- function(logit) {
   odds <- exp(logit)
   prob <- odds / (1 + odds)
   return(prob)
 }
 
-logit2prob(coefs_esc_1.1.upd[,1]) #probabilities
+logit2prob(coefs_esc_1.1.upd[, 1]) # probabilities
 
-#sim posterior simulations of beta from a glm object
-nsim<-1000
-bsim<-arm::sim(mod_esc_1.1.upd, n.sim=nsim)
+# Posterior simulations of beta from a glm object
+nsim <- 1000
+bsim <- arm::sim(mod_esc_1.1.upd, n.sim = nsim)
 
-#credibility interval for fixef
-apply(bsim@fixef, 2, quantile, prob=c(0.025, 0.975))
+# Credibility interval for fixef
+apply(bsim@fixef, 2, quantile, prob = c(0.025, 0.975))
 
-#model coefficients
+# Model coefficients
 summary(mod_esc_1.1.upd)$coefficients
 
-#function to copy model output for exporting it later 
+# Function to copy model output for exporting it later
 table <- function(model) {
-  a<- apply(bsim@fixef, 2, quantile, prob=c(0.025, 0.975))
-  ta<-t(a)
-  ta<-as.data.frame(ta)
-  b<- summary(model)$coefficients
-  b<-as.data.frame(b)
-  b<- b[ -c(2,3) ]
-  tab<-cbind(b,ta)  
-  tab<-round(tab,2)
+  a <- apply(bsim@fixef, 2, quantile, prob = c(0.025, 0.975))
+  ta <- t(a)
+  ta <- as.data.frame(ta)
+  b <- summary(model)$coefficients
+  b <- as.data.frame(b)
+  b <- b[-c(2, 3)]
+  tab <- cbind(b, ta)
+  tab <- round(tab, 2)
   tab
 }
 
-#table for fixed effects
-fixefs_mod_esc_1.1.upd<-(table(mod_esc_1.1.upd)[,-2])
-names(fixefs_mod_esc_1.1.upd)<-cbind("Selection gradient", "lower 2.5% CI",  "upper 97.5% CI")
-fixefs_mod_esc_1.1.upd <- data.frame("Fixed effects" = c("Intercept", "Focal resource acquisition ", "Focal hiding", "Focal defense", "Focal rescue", "Social resource acquisition ", "Social hiding", "Social defense", "Social rescue",  "Game duration"), fixefs_mod_esc_1.1.upd )
+# Table for fixed effects
+fixefs_mod_esc_1.1.upd <- (table(mod_esc_1.1.upd)[, -2])
+names(fixefs_mod_esc_1.1.upd) <- cbind(
+  "Selection gradient",
+  "lower 2.5% CI",
+  "upper 97.5% CI"
+)
+fixefs_mod_esc_1.1.upd <- data.frame(
+  "Fixed effects" = c(
+    "Intercept", "Focal resource acquisition ", "Focal hiding",
+    "Focal defense", "Focal rescue", "Social resource acquisition ",
+    "Social hiding", "Social defense", "Social rescue", "Game duration"
+  ),
+  fixefs_mod_esc_1.1.upd
+)
 
-#table for random effects
-tab_map_code_mod_esc_1.1.upd<-round(t(as.data.frame(quantile(apply(bsim@ranef$map_code[ , , 1],1,var), prob=c(0.5, 0.025, 0.975)))),2)
-ranefs_mod_esc_1.1.upd<-tab_map_code_mod_esc_1.1.upd
-names(ranefs_mod_esc_1.1.upd)<-cbind("Variance", "lower 2.5% CI",  "upper 97.5% CI")
-ranefs_mod_esc_1.1.upd <- data.frame("Random effects" = "Map", ranefs_mod_esc_1.1.upd)
+# Table for random effects
+tab_map_code_mod_esc_1.1.upd <- round(
+  t(as.data.frame(quantile(apply(bsim@ranef$map_code[ , , 1], 1, var), prob = c(0.5, 0.025, 0.975)))),
+  digits = 2
+)
+ranefs_mod_esc_1.1.upd <- tab_map_code_mod_esc_1.1.upd
+names(ranefs_mod_esc_1.1.upd) <- cbind(
+  "Variance", "lower 2.5% CI", "upper 97.5% CI"
+)
+ranefs_mod_esc_1.1.upd <- data.frame(
+  "Random effects" = "Map",
+  ranefs_mod_esc_1.1.upd
+)
 
-#TABLE S4 (model 1 output)
-tab_dfs(list(fixefs_mod_esc_1.1.upd,ranefs_mod_esc_1.1.upd),
-  titles = c("Model 1","Model 1"),
+# TABLE S4 (model 1 output)
+tab_dfs(
+  list(fixefs_mod_esc_1.1.upd, ranefs_mod_esc_1.1.upd),
+  titles = c("Model 1", "Model 1"),
   col.header = col,
-  file = "outputs/tables/table_mod_esc_1.1.upd.doc")
+  file = "outputs/tables/table_mod_esc_1.1.upd.doc"
+)
 
 
 ## b. Model 2
 
-system.time(mod_esc_2.1<- glmer (escaped ~   Zgen+ Zcrouching + Zchase + Zunhook +  Zsocial_gen+ Zsocial_crouching + Zsocial_chase + Zsocial_unhook+
-                                 Zgen*Zcrouching + Zgen*Zchase + Zgen*Zunhook +
-                                 Zcrouching*Zchase + Zcrouching*Zunhook + Zchase*Zunhook +
-                                 Zsocial_gen*Zsocial_crouching + Zsocial_gen*Zsocial_chase + Zsocial_gen*Zsocial_unhook +
-                                 Zsocial_crouching*Zsocial_chase + Zsocial_crouching*Zsocial_unhook + Zsocial_chase*Zsocial_unhook +
-                                 Zgen*Zsocial_gen + Zcrouching*Zsocial_crouching +  Zchase*Zsocial_chase +  Zunhook*Zsocial_unhook +
-                                 Zgame_duration + 
-                                 (1|map_code), data = df, family = binomial (link = "logit"),
-                                 control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)) )
+f2.1 <- "escaped ~
+    Zgen+ Zcrouching + Zchase + Zunhook +
+    Zsocial_gen + Zsocial_crouching + Zsocial_chase + Zsocial_unhook +
+    Zgen:Zcrouching + Zgen:Zchase + Zgen:Zunhook +
+    Zcrouching:Zchase + Zcrouching:Zunhook + Zchase:Zunhook +
+    Zsocial_gen:Zsocial_crouching + Zsocial_gen:Zsocial_chase +
+    Zsocial_gen:Zsocial_unhook + Zsocial_crouching:Zsocial_chase +
+    Zsocial_crouching:Zsocial_unhook + Zsocial_chase:Zsocial_unhook +
+    Zgen:Zsocial_gen + Zcrouching:Zsocial_crouching + 
+    Zchase:Zsocial_chase + Zunhook:Zsocial_unhook +
+    Zgame_duration + (1|map_code)"
 
-ss <- getME(mod_esc_2.1,c("theta","fixef"))
-mod_esc_2.1.upd <- update(mod_esc_2.1,start=ss,control=glmerControl(optCtrl=list(maxfun=2e4)))
+system.time(
+  mod_esc_2.1 <- glmer(
+    formula = f2.1,
+    data = df,
+    family = binomial(link = "logit"),
+    control = glmerControl(optimizer = "nloptwrap", nAGQ0initStep = TRUE)
+  )
+)
+
+ss <- getME(mod_esc_2.1, c("theta","fixef"))
+mod_esc_2.1.upd <- update(
+  mod_esc_2.1,
+  start = ss,
+  control = glmerControl(optCtrl = list(maxfun = 2e4))
+)
 
 saveRDS(mod_esc_2.1.upd, file = "outputs/models_outputs/mod_esc_2.1.upd.rds")
 #mod_esc_2.1.upd <- readRDS("outputs/models_outputs/mod_esc_2.1.upd.rds")
@@ -246,9 +301,11 @@ tab_dfs(list(fixefs_mod_esc_4.1.upd,ranefs_mod_esc_4.1.upd),
         col.header = col,
         file = "outputs/tables/table_mod_esc_4.1.upd.doc")
 
-#######################
-# 3. Selection gradients #
-######################
+
+
+#################################################
+# 3. Selection gradients
+#################################################
 
 #loading models and coefs if they are not loaded already
 #mod_esc_1.1.upd <- readRDS("outputs/models_outputs/mod_esc_1.1.upd.rds")
@@ -273,9 +330,10 @@ E_bs_chase<-coefs_esc_1.1.upd[8,1]
 E_bs_unhook<-coefs_esc_1.1.upd[9,1]
 
 
-#######################
-# 4. Selection differentials #
-######################
+
+#################################################
+# 4. Selection differentials
+#################################################
 
 #EQ 11 from Wolf et al. 1999 paper: S=P*bN+CI*bS
 
@@ -378,9 +436,9 @@ tab_df(Esc_rate_gradients,
        file = "outputs/tables/table_gradients_survival.doc")
 
 
-#######################
+#################################################
 # 5. Contributions to selection
-######################
+#################################################
 
 E_S=P%*%E_bn+CI%*%E_bs
 
